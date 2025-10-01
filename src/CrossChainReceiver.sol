@@ -5,9 +5,31 @@ import "lib/wormhole-solidity-sdk/src/WormholeRelayerSDK.sol";
 import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
 
 /**
- * @title CrossChainReceiver.
- * @notice A contract to handle receiving of tokens cross chain using wormhole cross chain token transfer.
- * @notice This contract is deployed on multiple chains to support multiple target chains.
+ * @title CrossChainReceiver
+ * @notice This contract enables the reception of cross-chain token transfers 
+ *         via the Wormhole messaging and token bridge system.
+ * @dev This contract extends {TokenReceiver}, which itself relies on Wormhole's 
+ *      relayer infrastructure to validate and deliver cross-chain messages.
+ * 
+ * ### High-Level Workflow:
+ * 1. A transaction is initiated on a source chain to send tokens cross-chain 
+ *    using the Wormhole TokenBridge and Relayer.
+ * 2. Wormhole verifies and relays the message + tokens to this target chain.
+ * 3. The `receivePayloadAndTokens` function is triggered internally by the Wormhole relayer 
+ *    once the message and tokens arrive.
+ * 4. The contract decodes the payload (which contains the recipient address),
+ *    validates the sender, and transfers the received tokens to the intended recipient.
+ * 
+ * ### Security Notes:
+ * - Only messages from registered and verified source contracts are processed
+ *   (via the {isRegisteredSender} modifier).
+ * - The Wormhole relayer enforces authenticity (via the {onlyWormholeRelayer} modifier).
+ * - Exactly one token transfer must accompany the payload (enforced by `require`).
+ * 
+ * ### Deployment Notes:
+ * - This contract should be deployed on each destination chain where 
+ *   cross-chain transfers need to be received.
+ * - The constructor requires addresses of the Wormhole relayer, token bridge, and Wormhole core.
  */
 contract CrossChainReceiver is TokenReceiver {
         // The wormhole relayer and registeredSenders are inherited from the Base.sol contract.
