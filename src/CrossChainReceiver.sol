@@ -52,7 +52,31 @@ contract CrossChainReceiver is TokenReceiver {
         TokenBase(_wormholeRelayer, _tokenBridge, _wormhole)
     { }
 
-    // Function to receive the cross-chain payload and tokens with emitter validation
+    /**
+     * @notice Internal function executed when a cross-chain message and tokens 
+     *         are received from Wormhole.
+     * 
+     * @dev This function:
+     *  - Can only be called by the Wormhole Relayer ({onlyWormholeRelayer}).
+     *  - Validates that the sender is a registered source contract 
+     *    on the expected source chain ({isRegisteredSender}).
+     *  - Requires exactly one token transfer to accompany the payload.
+     *  - Decodes the payload to extract the recipient address.
+     *  - Approves and then transfers the received tokens to the recipient.
+     * 
+     * @param payload ABI-encoded data sent from the source chain.
+     *        - Expected to contain the recipient's address (decoded as `address`).
+     * @param receivedTokens Array of {TokenReceived} structs containing details 
+     *        of the transferred tokens (address, amount, origin).
+     *        - Must contain exactly one entry.
+     * @param sourceAddress The contract address (on the source chain) 
+     *        that initiated the cross-chain transfer.
+     * @param sourceChain The Wormhole chain ID of the source chain.
+     * 
+     * @custom:require receivedTokens.length == 1 
+     *           Ensures only one token transfer is processed.
+     * @custom:security only callable via Wormhole relayer and from registered source.
+     */
     function receivePayloadAndTokens(
         bytes memory payload,
         TokenReceived[] memory receivedTokens,
