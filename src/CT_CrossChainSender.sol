@@ -14,4 +14,18 @@ contract CT_CrossChainSender is TokenSender {
     )
         TokenBase(_wormholeRelayer, _tokenBridge, _wormhole)
     { }
+
+    // Function to get the estimated cost for cross-chain deposit
+    function quoteCrossChainDeposit(uint16 targetChain) public view returns (uint256 cost) {
+        // Get the cost of delivering the token and payload to the target chain
+        uint256 deliveryCost;
+        (deliveryCost,) = wormholeRelayer.quoteEVMDeliveryPrice(
+            targetChain,
+            0, // receiver value (set to 0 in this example)
+            GAS_LIMIT
+        );
+
+        // Total cost: delivery cost + cost of publishing the Wormhole message
+        cost = deliveryCost + wormhole.messageFee();
+    }
 }
