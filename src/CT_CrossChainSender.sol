@@ -31,6 +31,8 @@ import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
  * - The constructor requires Wormhole dependencies: relayer, token bridge, core.
  */
 contract CT_CrossChainSender is TokenSender {
+    /// @notice Gas limit allocated for the execution of the target chain transaction.
+    /// @dev This constant ensures that destination execution will not run out of gas.
     uint256 constant GAS_LIMIT = 250_000;
 
         constructor(
