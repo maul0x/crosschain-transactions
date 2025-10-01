@@ -4,6 +4,32 @@ pragma solidity ^0.8.13;
 import "lib/wormhole-solidity-sdk/src/WormholeRelayerSDK.sol";
 import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
 
+/**
+ * @title CT_CrossChainSender
+ * @notice A contract that facilitates cross-chain ERC20 token deposits 
+ *         using Wormhole's TokenBridge and Relayer SDK.
+ * 
+ * ### High-Level Workflow:
+ * 1. A user calls {sendCrossChainDeposit} on the source chain.
+ * 2. The contract:
+ *    - Collects the required cross-chain fee (quoted from Wormhole relayer).
+ *    - Pulls tokens from the sender via {IERC20.transferFrom}.
+ *    - Encodes the recipient address into a payload.
+ *    - Sends both tokens and payload cross-chain using Wormhole's relayer.
+ * 3. The paired contract (e.g., {CrossChainReceiver}) on the destination chain 
+ *    receives the message and tokens, and finalizes delivery to the recipient.
+ * 
+ * ### Security Notes:
+ * - Users must approve this contract to spend tokens before calling 
+ *   {sendCrossChainDeposit}.
+ * - The required Wormhole relayer fee must be sent with the transaction (`msg.value`).
+ * - GAS_LIMIT is hardcoded to ensure enough execution gas for the destination call.
+ * 
+ * ### Deployment Notes:
+ * - This contract must be deployed on the source chain(s) from which tokens 
+ *   will be sent.
+ * - The constructor requires Wormhole dependencies: relayer, token bridge, core.
+ */
 contract CT_CrossChainSender is TokenSender {
     uint256 constant GAS_LIMIT = 250_000;
 
