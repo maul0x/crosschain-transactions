@@ -78,35 +78,67 @@ contract CT_CrossChainSender is TokenSender {
         cost = deliveryCost + wormhole.messageFee();
     }
 
-    // Function to send tokens and payload across chains
+    /**
+     * @notice Sends tokens and a payload (recipient address) to a target chain.
+     * @param targetChain Wormhole chain ID for the target (destination) chain.
+     * @param targetReceiver The address of the {TokenReceiver} contract on the target chain.
+     * @param recipient The recipient’s address on the target chain (decoded in the receiver).
+     * @param amount The amount of tokens to transfer.
+     * @param token The ERC20 token contract address of the asset being transferred.
+     * 
+     * @dev Workflow:
+     *  - Quotes the cost of delivery with {quoteCrossChainDeposit}.
+     *  - Requires the caller to provide the exact quoted fee in `msg.value`.
+     *  - Pulls the token amount from the caller (must be approved beforehand).
+     *  - Encodes the `recipient` address into the payload.
+     *  - Uses {sendTokenWithPayloadToEvm} (from Wormhole SDK) to send the tokens + payload.
+     * 
+     * @custom:require msg.value == quoteCrossChainDeposit(targetChain)
+     *         Ensures the sender provides the correct fee for delivery.
+     * @custom:require IERC20(token).transferFrom succeeds
+     *         Caller must have approved the token transfer.
+     * 
+     * Example:
+     * ```solidity
+     * // User wants to send 100 tokens to address R on chain X:
+     * token.approve(address(sender), 100);
+     * sender.sendCrossChainDeposit{value: sender.quoteCrossChainDeposit(X)}(
+     *     X,
+     *     receiverOnChainX,
+     *     recipientAddress,
+     *     100,
+     *     address(token)
+     * );
+     * ```
+     */
     function sendCrossChainDeposit(
-        uint16 targetChain, // Wormhole chain ID for the target chain
-        address targetReceiver, // Address of the TokenReceiver contract on the target chain
-        address recipient, // Recipient address on the target chain
-        uint256 amount, // Amount of tokens to send
-        address token // Address of the IERC20 token contract
+        uint16 targetChain,      // Wormhole chain ID for the target chain
+        address targetReceiver,  // Address of the TokenReceiver contract on the target chain
+        address recipient,       // Recipient address on the target chain
+        uint256 amount,          // Amount of tokens to send
+        address token            // ERC20 token contract address
     )
         public
         payable
     {
-        // Get the cost for cross-chain deposit
+        // Get the delivery cost for this target chain
         uint256 cost = quoteCrossChainDeposit(targetChain);
         require(msg.value == cost, "msg.value must equal quoteCrossChainDeposit(targetChain)");
 
-        // Transfer the specified amount of tokens from the user to this contract
+        // Transfer the specified amount of tokens from sender to this contract
         IERC20(token).transferFrom(msg.sender, address(this), amount);
 
-        // Encode the recipient's address into a payload
+        // Encode the recipient's address into a payload (decoded on the receiver side)
         bytes memory payload = abi.encode(recipient);
 
-        // Use the Wormhole SDK to send the token and payload cross-chain
+        // Send the token + payload cross-chain using Wormhole SDK
         sendTokenWithPayloadToEvm(
             targetChain,
-            targetReceiver, // Address on the target chain to send the token and payload
+            targetReceiver,
             payload,
-            0, // Receiver value (set to 0 in this example)
+            0,        // receiver value (set to 0 in this example)
             GAS_LIMIT,
-            token, // Address of the IERC20 token contract
+            token,
             amount
         );
     }
