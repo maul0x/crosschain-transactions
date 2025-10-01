@@ -32,7 +32,18 @@ import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
  * - The constructor requires addresses of the Wormhole relayer, token bridge, and Wormhole core.
  */
 contract CrossChainReceiver is TokenReceiver {
-        // The wormhole relayer and registeredSenders are inherited from the Base.sol contract.
+    /**
+     * @notice Initializes the CrossChainReceiver contract.
+     * @param _wormholeRelayer The address of the Wormhole Relayer contract 
+     *        responsible for delivering cross-chain messages.
+     * @param _tokenBridge The address of the Wormhole Token Bridge contract 
+     *        that locks/mints tokens across chains.
+     * @param _wormhole The address of the Wormhole core contract 
+     *        that verifies VAAs (Verified Action Approvals).
+     * 
+     * @dev Calls the {TokenBase} constructor (inherited from Wormhole SDK) 
+     *      to set up the relayer and bridge dependencies.
+     */
     constructor(
         address _wormholeRelayer,
         address _tokenBridge,
