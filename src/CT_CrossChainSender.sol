@@ -35,6 +35,14 @@ contract CT_CrossChainSender is TokenSender {
     /// @dev This constant ensures that destination execution will not run out of gas.
     uint256 constant GAS_LIMIT = 250_000;
 
+    /**
+     * @notice Initializes the CrossChainSender contract.
+     * @param _wormholeRelayer Address of the Wormhole Relayer contract on the current chain.
+     * @param _tokenBridge Address of the Wormhole TokenBridge contract on the current chain.
+     * @param _wormhole Address of the Wormhole core contract on the current chain.
+     * 
+     * @dev Calls {TokenBase} constructor to configure cross-chain messaging dependencies.
+     */
         constructor(
         address _wormholeRelayer,
         address _tokenBridge,
