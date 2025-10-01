@@ -5,7 +5,7 @@ import "lib/wormhole-solidity-sdk/src/WormholeRelayerSDK.sol";
 import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
 
 /**
- * @title CrossChainReceiver
+ * @title CT_CrossChainReceiver
  * @notice This contract enables the reception of cross-chain token transfers
  *         via the Wormhole messaging and token bridge system.
  * @dev This contract extends {TokenReceiver}, which itself relies on Wormhole's
@@ -31,7 +31,7 @@ import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
  *   cross-chain transfers need to be received.
  * - The constructor requires addresses of the Wormhole relayer, token bridge, and Wormhole core.
  */
-contract CrossChainReceiver is TokenReceiver {
+contract CT_CrossChainReceiver is TokenReceiver {
     /**
      * @notice Initializes the CrossChainReceiver contract.
      * @param _wormholeRelayer The address of the Wormhole Relayer contract
