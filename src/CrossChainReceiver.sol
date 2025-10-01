@@ -9,4 +9,14 @@ import "lib/wormhole-solidity-sdk/src/interfaces/IERC20.sol";
  * @notice A contract to handle receiving of tokens cross chain using wormhole cross chain token transfer.
  * @notice This contract is deployed on multiple chains to support multiple target chains.
  */
-contract CrossChainReceiver {}
+contract CrossChainReceiver {
+        // The wormhole relayer and registeredSenders are inherited from the Base.sol contract.
+    constructor(
+        address _wormholeRelayer,
+        address _tokenBridge,
+        address _wormhole
+    )
+        TokenBase(_wormholeRelayer, _tokenBridge, _wormhole)
+    { }
+    
+}
